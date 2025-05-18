@@ -67,6 +67,7 @@ python etl/payments.py
 ## 👤 Auteur
 
 Tanguy Boris YAO
+
 Business Intelligence Manager - Passionné de Data Engineering
 
 - 🧑‍💻 🧑‍💻 GitHub : [@Tanguy-YAO](https://github.com/Tanguy-YAO)
