@@ -1,0 +1,25 @@
+Petite documentation complémentaire: création FastAPI
+
+Commande de lancement
+uvicorn api.main:app --reload --port 8500
+
+Explication :
+api.main → signifie « va chercher le fichier main.py dans le dossier api/ »
+:app → fait référence à l’objet app = FastAPI() défini dans le script
+--reload → active le mode auto-reload (utile pour le développement)
+--port 8500 → indique sur quel port l’API écoute (utile si le port 8000 est déjà utilisé)
+
+
+Ensuite, tu accèdes à :
+
+http://127.0.0.1:8500/ → test rapide
+http://127.0.0.1:8500/docs → interface Swagger interactive auto-générée 🧪
+http://127.0.0.1:8500/customers → liste de tous les clients
+http://127.0.0.1:8500/customers/XXXX → un client spécifique par ID
+
+✅ Ce que tu as mis en place
+✅ Une API REST locale simulant un CRM
+✅ Une route pour tester le fonctionnement
+✅ Une route pour récupérer tous les clients
+✅ Une route dynamique pour accéder à un client spécifique
+
