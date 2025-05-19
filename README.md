@@ -30,8 +30,7 @@ API FastAPI → Scripts ETL Python → Base PostgreSQL → Tableaux de bord Meta
 ![Metabase](https://img.shields.io/badge/Metabase-0063F7?logo=metabase&logoColor=white)
 ![ETL](https://img.shields.io/badge/ETL%20Pipeline-Automated-success)
 
-![Architecture Diagram](docs/architecture.png)
-
+![image](https://github.com/user-attachments/assets/7f1c76ff-43dd-4904-9ddb-6de43ace8009)
 
 ## ▶️ Exécuter ce projet localement
 
@@ -90,3 +89,30 @@ Ce projet étant un pipeline de données, la validation repose sur :
 ### Validation visuelle via Metabase :
 - Les dashboards s'affichent correctement avec les bonnes jointures
 - Les KPIs sont alignés avec les données brutes et simulées
+
+## Dashboard interactif dans Metabase
+- Suivi du churn rate global
+- Répartition des contrats et statuts de paiement
+- Revenus collectés par mois
+- Analyse croisée entre churn et services internet.
+
+_📸Voir ci-dessous un aperçu du tableau de bord construit dans Metabase:_
+![image](https://github.com/user-attachments/assets/189319e8-a235-4b00-9083-71e824d04b46)
+
+
+## 🧠 Conclusion & Perspectives
+
+Ce projet fait la simulation d'un cas pratique et concret de suivi de la réiliation client dans le secteur des télécommunications. Il démontre parfaitement l'intégration complète d'un pipeline Data Engineering, de l'API à la visualisation décisionnelle via Metabase.
+
+## Compétences développées
+- Construction d'une API avec FastAPI
+- Scripts ETL Python bien structurés et automatisables
+- Stockage structuré des données dans une base de données PostgreSQL
+- Création de dashboards dynamiques avec Metabase
+- Utilisation de GitHub pour le versioning et la documentation
+
+## Prochaines étapes / Pistes d'amélioration
+- Orchestration de l'ETL avec Apchache Airflow
+- Passer à une architecture cloud-native
+- Prédiction du churn
+
