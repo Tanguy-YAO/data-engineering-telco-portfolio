@@ -1,6 +1,7 @@
 # Etape 1:Importation des bibliothèques nécessaires
 import requests                      # Pour appeler l'API
 import psycopg2                      # Pour se connecter à PostgreSQL
+from psycopg2.extras import execute_batch
 import os                            # Pour accéder aux variables d’environnement
 from dotenv import load_dotenv       # Pour charger le fichier .env
 
@@ -8,41 +9,27 @@ from dotenv import load_dotenv       # Pour charger le fichier .env
 load_dotenv()
 
 # Etape 3: Appel de l'API FastAPI
-url = "http://127.0.0.1:8500/customers"  # URL de ton endpoint local
+def load_customers():
+    """Charge les clients via l'API et les insère dans PostgreSQL."""
+    url = "http://127.0.0.1:8500/customers"  # URL de l'API locale
 
-response = requests.get(url) # Appel GET à l'API
+    response = requests.get(url)
 
-# Vérifie que la réponse est correcte (status 200)
-if response.status_code != 200:
-    raise Exception(f"Erreur API : {response.status_code}")
+    if response.status_code != 200:
+        raise Exception(f"Erreur API : {response.status_code}")
 
-# Récupère les données au format JSON (liste de dictionnaires)
-data = response.json()
+    data = response.json()
 
-#print(f"{len(data)} clients récupérés depuis l'API avec succès.")
-
-# Etape 4: Connexion à la base PostgreSQL
-
-# Connexion via les identifiants sécurisés
-conn = psycopg2.connect(
-    host=os.getenv("DB_HOST"),
-    port=os.getenv("DB_PORT"),
-    dbname=os.getenv("DB_NAME"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD")
-)
-
-# Création d’un curseur pour exécuter les requêtes
-cur = conn.cursor()
-
-#print("Connexion à PostgreSQL réussie.")
-
-# ---------------------------------------------
-# Étape 6 – Insertion des données dans PostgreSQL
-# ---------------------------------------------
-
-# Requête SQL avec gestion des doublons
-insert_query = """
+    # Connexion via les identifiants sécurisés
+    with psycopg2.connect(
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT"),
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+    ) as conn:
+        with conn.cursor() as cur:
+            insert_query = """
 INSERT INTO customers (
     customerID, gender, SeniorCitizen, Partner, Dependents, tenure,
     PhoneService, MultipleLines, InternetService, OnlineSecurity,
@@ -80,25 +67,19 @@ ON CONFLICT (customerID) DO UPDATE SET
     Churn = EXCLUDED.Churn;
 """
 
-# Insertion ligne par ligne
-for row in data:
-    try:
-        # Gestion du champ TotalCharges qui peut être vide ou invalide
-        row["TotalCharges"] = float(row["TotalCharges"])
-    except:
-        row["TotalCharges"] = None
+            for row in data:
+                try:
+                    row["TotalCharges"] = float(row["TotalCharges"])
+                except ValueError:
+                    row["TotalCharges"] = None
 
-    cur.execute(insert_query, row)
+            execute_batch(cur, insert_query, data)
+            conn.commit()
 
-# Validation des insertions
-conn.commit()
+    print(f"{len(data)} clients récupérés depuis l'API avec succès.")
+    print("✅ Données insérées avec succès.")
 
-# Étape 7 – Fermeture propre + log final
 
-print(f"{len(data)} clients récupérés depuis l'API avec succès.")
-print("✅ Données insérées avec succès.")
-
-cur.close() # Ferme le curseur qui est l'objet facilitant la connexion à PostgreSQL.
-conn.close() # Ferme la connexion à PostgreSQL.
-print("✅ Connexion PostgreSQL fermée.")
+if __name__ == "__main__":
+    load_customers()
 

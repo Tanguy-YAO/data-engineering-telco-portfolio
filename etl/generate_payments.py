@@ -2,6 +2,8 @@ import json
 import random
 from datetime import datetime, timedelta
 
+random.seed(42)
+
 # Étape 1 – Charger les clients existants
 with open("data/customers.json", "r") as f:
     customers = json.load(f)

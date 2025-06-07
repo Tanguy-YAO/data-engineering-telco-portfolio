@@ -1,11 +1,9 @@
 # Import du framework FastAPI
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 # Import de pandas pour charger et manipuler les données
 import pandas as pd
 
-# Le chemin d'accès de l'API pour extraire les données
-url = "http://localhost:8500/customers"
 
 # Initialisation de l'application FastAPI
 app = FastAPI()
@@ -35,7 +33,7 @@ def get_customer(customer_id: str):
     customer = df[df["customerID"] == customer_id]
     # Si aucun client ne correspond
     if customer.empty:
-        return {"error": "Customer not found"}
+        raise HTTPException(status_code=404, detail="Customer not found")
     # Sinon, retourne le client trouvé sous forme de dictionnaire
     return customer.to_dict(orient="records")[0]
 
