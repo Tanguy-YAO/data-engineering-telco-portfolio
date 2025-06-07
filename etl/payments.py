@@ -1,39 +1,33 @@
 # Étape 1 – Importation des bibliothèques nécessaires
 import requests
 import psycopg2
+from psycopg2.extras import execute_batch
 import os
 from dotenv import load_dotenv
 
 # Étape 2 – Chargement des identifiants de connexion
 load_dotenv()
 
-# Étape 3 – Appel de l’API FastAPI (GET /payments)
-url = "http://127.0.0.1:8500/payments"
-response = requests.get(url)
 
-# Vérifie que l'API a bien répondu
-if response.status_code != 200:
-    raise Exception(f"Erreur API /payments : {response.status_code}")
+def load_payments():
+    """Récupère les paiements via l'API et les insère dans PostgreSQL."""
+    url = "http://127.0.0.1:8500/payments"
+    response = requests.get(url)
 
-# Récupère les données au format JSON
-data = response.json()
+    if response.status_code != 200:
+        raise Exception(f"Erreur API /payments : {response.status_code}")
 
-# print(f"{len(data)} paiements récupérés depuis l’API.")
+    data = response.json()
 
-# Étape 4 – Connexion à la base PostgreSQL
-conn = psycopg2.connect(
-    host=os.getenv("DB_HOST"),
-    port=os.getenv("DB_PORT"),
-    dbname=os.getenv("DB_NAME"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD")
-)
-
-cur = conn.cursor()
-#print("Connexion à PostgreSQL réussie.")
-
-# Étape 5 – Création et insertion dans la table payments
-create_table_query = """
+    with psycopg2.connect(
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT"),
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+    ) as conn:
+        with conn.cursor() as cur:
+            create_table_query = """
 CREATE TABLE IF NOT EXISTS payments (
     payment_id VARCHAR PRIMARY KEY,
     customerID VARCHAR,
@@ -43,14 +37,9 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_status VARCHAR
 );
 """
+            cur.execute(create_table_query)
 
-cur.execute(create_table_query)
-conn.commit()
-#print("Table payments prête.")
-
-# Étape 6 – Insertion des paiements dans la table PostgreSQL
-
-insert_query = """
+            insert_query = """
 INSERT INTO payments (
     payment_id, customerID, payment_date, amount, payment_method, payment_status
 )
@@ -64,16 +53,11 @@ ON CONFLICT (payment_id) DO UPDATE SET
     payment_method = EXCLUDED.payment_method,
     payment_status = EXCLUDED.payment_status;
 """
+            execute_batch(cur, insert_query, data)
+            conn.commit()
 
-count = 0
-for row in data:
-    cur.execute(insert_query, row)
-    count += 1
+    print(f"✅ {len(data)} paiements insérés ou mis à jour.")
 
-conn.commit()
-print(f"✅ {count} paiements insérés ou mis à jour.")
 
-# Étape 7 – Fermeture des connexions
-cur.close()
-conn.close()
-print("✅ Connexion PostgreSQL fermée.")
+if __name__ == "__main__":
+    load_payments()
